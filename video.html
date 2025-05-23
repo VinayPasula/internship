@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Chat - Internship Task</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .video-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+      padding: 40px;
+    }
+    video {
+      width: 300px;
+      height: 220px;
+      background: black;
+      border: 2px solid #000;
+      border-radius: 10px;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🧭 Navbar -->
+  <div class="nav">
+    <div class="logo">
+      <a href="index.html"><span>V</span>inay</a>
+    </div>
+    <ul class="menu">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="videochat.html" class="active">Video Chat</a></li>
+    </ul>
+  </div>
+
+  <!-- 🎥 Video Chat Section -->
+  <div class="video-section">
+    <h1>Peer-to-Peer Video Chat</h1>
+    
+    <video id="local-video" autoplay muted></video>
+    <video id="remote-video" autoplay></video>
+    
+    <div class="input-group">
+      <input type="text" id="peer-id" placeholder="Enter Peer ID to call">
+      <button onclick="callPeer()">Call</button>
+    </div>
+
+    <p>Your ID: <span id="my-id">Loading...</span></p>
+  </div>
+    <section style="text-align: center; padding: 40px;">
+     <h2>Demo Video</h2>
+     <video controls width="500">
+     <source src="videos/demo.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+     </video>
+    </section>
+
+
+  <!-- PeerJS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+ <script>
+  const localVideo = document.getElementById("local-video");
+  const remoteVideo = document.getElementById("remote-video");
+  const myIdDisplay = document.getElementById("my-id");
+  const peer = new Peer();
+
+  let localStream = null;
+  let currentCall = null;
+
+  function getMediaStream() {
+    return navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  }
+
+  function setupLocalStream() {
+    getMediaStream()
+      .then(stream => {
+        localStream = stream;
+        localVideo.srcObject = stream;
+      })
+      .catch(error => {
+        console.error("Error getting user media:", error);
+        alert("Camera/mic access failed. Please allow permissions.");
+      });
+  }
+
+  peer.on("open", id => {
+    myIdDisplay.textContent = id;
+    setupLocalStream();
+  });
+
+  peer.on("call", call => {
+    if (!localStream) {
+      setupLocalStream().then(() => answerCall(call));
+    } else {
+      answerCall(call);
+    }
+  });
+
+  function answerCall(call) {
+    currentCall = call;
+    call.answer(localStream);
+    call.on("stream", remoteStream => {
+      remoteVideo.srcObject = remoteStream;
+    });
+    call.on("close", () => {
+      remoteVideo.srcObject = null;
+    });
+  }
+
+  function callPeer() {
+    const peerId = document.getElementById("peer-id").value.trim();
+    if (!peerId) {
+      alert("Enter a Peer ID!");
+      return;
+    }
+
+    if (!localStream) {
+      setupLocalStream().then(() => {
+        startCall(peerId);
+      });
+    } else {
+      startCall(peerId);
+    }
+  }
+
+  function startCall(peerId) {
+    const call = peer.call(peerId, localStream);
+    currentCall = call;
+    call.on("stream", remoteStream => {
+      remoteVideo.srcObject = remoteStream;
+    });
+    call.on("close", () => {
+      remoteVideo.srcObject = null;
+    });
+  }
+ </script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+body {
+  background-color: #141414;
+  color: #FFFFFF;
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.btn-primary {
+  background-color: #E50914;
+  border: none;
+  color: #fff;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #B20710;
+  box-shadow: 0 0 10px 3px rgba(229, 9, 20, 0.7);
+}
+
+.card:hover {
+  transform: scale(1.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+}
+
+section {
+  flex: 1;
+}
+
+
+
